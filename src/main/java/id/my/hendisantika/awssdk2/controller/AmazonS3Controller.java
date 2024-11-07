@@ -4,10 +4,14 @@ import id.my.hendisantika.awssdk2.service.AmazonS3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,4 +41,10 @@ public class AmazonS3Controller {
         return amazonS3Service.getBucketObjects();
     }
 
+    @PostMapping
+    public List<String> uploadFile(@RequestParam("file") List<MultipartFile> multipartFiles) {
+        return multipartFiles.stream()
+                .map(amazonS3Service::uploadFile)
+                .collect(Collectors.toList());
+    }
 }
