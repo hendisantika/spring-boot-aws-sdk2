@@ -1,10 +1,16 @@
 package id.my.hendisantika.awssdk2.controller;
 
 import id.my.hendisantika.awssdk2.service.AmazonSQSService;
+import id.my.hendisantika.awssdk2.utils.MyTuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResponse;
+import software.amazon.awssdk.services.sqs.model.Message;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,4 +29,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AmazonSQSController {
 
     private final AmazonSQSService amazonSQSService;
+
+    @GetMapping
+    public MyTuple.MyTuple2<List<Message>, DeleteMessageBatchResponse> consumeMessage() {
+        return amazonSQSService.consume();
+    }
 }
