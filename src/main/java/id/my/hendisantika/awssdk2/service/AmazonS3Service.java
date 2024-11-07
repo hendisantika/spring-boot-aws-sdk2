@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 
+import java.util.List;
+
 /**
  * Created by IntelliJ IDEA.
  * Project : spring-boot-aws-sdk2
@@ -28,4 +30,8 @@ public class AmazonS3Service {
         this.awsProperties = awsProperties;
     }
 
+    public List<String> getAllBuckets() {
+        return s3Client.listBuckets().buckets().stream()
+                .map(Bucket::name).toList();
+    }
 }
