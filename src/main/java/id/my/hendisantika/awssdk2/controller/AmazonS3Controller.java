@@ -3,6 +3,7 @@ package id.my.hendisantika.awssdk2.controller;
 import id.my.hendisantika.awssdk2.service.AmazonS3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -52,5 +53,10 @@ public class AmazonS3Controller {
     @PutMapping
     public String updateFile(@RequestParam String fileName, @RequestParam("file") MultipartFile multipartFile) {
         return amazonS3Service.updateFile(fileName, multipartFile);
+    }
+
+    @DeleteMapping
+    public void deleteFile(@RequestParam String fileName) {
+        amazonS3Service.deleteFile(fileName);
     }
 }
