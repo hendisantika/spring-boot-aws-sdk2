@@ -7,12 +7,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.AbortMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CompletedMultipartUpload;
+import software.amazon.awssdk.services.s3.model.CompletedPart;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.StorageClass;
+import software.amazon.awssdk.services.s3.model.UploadPartRequest;
+import software.amazon.awssdk.services.s3.model.UploadPartResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -89,6 +100,72 @@ public class AmazonS3Service {
                     RequestBody.fromBytes(multipartFile.getInputStream().readAllBytes()));
             return multipartFile.getOriginalFilename() + " Uploaded.";
         } catch (IOException e) {
+            return e.getMessage();
+        }
+    }
+
+    public String multipartUploadFile(MultipartFile multipartFile) {
+        String bucketName = awsProperties.getS3().getBucket();
+        String key = multipartFile.getOriginalFilename();
+
+        CreateMultipartUploadRequest createMultipartUploadRequest = CreateMultipartUploadRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+
+        CreateMultipartUploadResponse createMultipartUploadResponse = s3Client.createMultipartUpload(createMultipartUploadRequest);
+        String uploadId = createMultipartUploadResponse.uploadId();
+        log.info("UploadId: {}", uploadId);
+
+        try {
+            InputStream inputStream = multipartFile.getInputStream();
+            int BUFFER_SIZE = 5 * 1024 * 1024, partId = 1, bytesRead;
+            byte[] byteArray = new byte[BUFFER_SIZE];
+            List<CompletedPart> completedParts = new ArrayList<>();
+
+            while ((bytesRead = inputStream.read(byteArray, 0, BUFFER_SIZE)) != -1) {
+                log.info("Part No. {}, Bytes Read: {}", partId, bytesRead);
+
+                UploadPartRequest uploadRequest = UploadPartRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .uploadId(uploadId)
+                        .partNumber(partId)
+                        .build();
+
+                UploadPartResponse uploadPartResponse = s3Client.uploadPart(uploadRequest,
+                        RequestBody.fromByteBuffer(ByteBuffer.wrap(byteArray, 0, bytesRead)));
+
+                completedParts.add(CompletedPart.builder()
+                        .partNumber(partId)
+                        .eTag(uploadPartResponse.eTag())
+                        .build());
+
+                log.info("Successfully submitted uploadPartId: {} | {}", partId++, uploadPartResponse);
+            }
+
+            CompletedMultipartUpload completedMultipartUpload = CompletedMultipartUpload.builder()
+                    .parts(completedParts)
+                    .build();
+
+            CompleteMultipartUploadRequest completeMultipartUploadRequest = CompleteMultipartUploadRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .uploadId(uploadId)
+                    .multipartUpload(completedMultipartUpload)
+                    .build();
+
+            String response = s3Client.completeMultipartUpload(completeMultipartUploadRequest).key();
+            log.info("File uploaded successfully.");
+            return response;
+        } catch (IOException e) {
+            // abort upload
+            AbortMultipartUploadRequest abortMultipartUploadRequest = AbortMultipartUploadRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .uploadId(uploadId)
+                    .build();
+            s3Client.abortMultipartUpload(abortMultipartUploadRequest);
             return e.getMessage();
         }
     }
