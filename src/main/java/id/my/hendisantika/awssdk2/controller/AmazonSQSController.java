@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 import java.util.List;
@@ -41,5 +42,10 @@ public class AmazonSQSController {
     @PostMapping
     public SendMessageResponse produceMessage(@RequestBody String message) {
         return amazonSQSService.produce(message);
+    }
+
+    @PostMapping("bulk")
+    public SendMessageBatchResponse produceBulkMessage(@RequestBody List<String> messages) {
+        return amazonSQSService.produceBatch(messages);
     }
 }
