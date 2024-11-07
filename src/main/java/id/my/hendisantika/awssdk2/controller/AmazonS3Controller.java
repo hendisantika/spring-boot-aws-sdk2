@@ -21,14 +21,20 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("s3")
+@RequestMapping("s3/buckets")
 @RequiredArgsConstructor
 public class AmazonS3Controller {
 
     private final AmazonS3Service amazonS3Service;
 
-    @GetMapping("buckets")
+    @GetMapping
     public List<String> getAllBuckets() {
         return amazonS3Service.getAllBuckets();
     }
+
+    @GetMapping("all")
+    public List<String> getBucketObjects() {
+        return amazonS3Service.getBucketObjects();
+    }
+
 }
