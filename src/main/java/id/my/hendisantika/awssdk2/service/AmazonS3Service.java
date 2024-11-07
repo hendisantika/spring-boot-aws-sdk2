@@ -4,9 +4,14 @@ import id.my.hendisantika.awssdk2.config.AwsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.StorageClass;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -43,4 +48,22 @@ public class AmazonS3Service {
         return s3Client.listObjectsV2(request).contents().stream()
                 .map(S3Object::key).toList();
     }
+
+    public String uploadFile(MultipartFile multipartFile) {
+        try {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(awsProperties.getS3().getBucket())
+                    .key(multipartFile.getOriginalFilename())
+                    .contentLength(multipartFile.getSize())
+                    .storageClass(StorageClass.GLACIER)
+                    .build();
+
+            s3Client.putObject(putObjectRequest,
+                    RequestBody.fromBytes(multipartFile.getInputStream().readAllBytes()));
+            return multipartFile.getOriginalFilename() + " Uploaded.";
+        } catch (IOException e) {
+            return e.getMessage();
+        }
+    }
+
 }
