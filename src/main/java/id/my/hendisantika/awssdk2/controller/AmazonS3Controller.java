@@ -67,4 +67,9 @@ public class AmazonS3Controller {
                 .map(amazonS3Service::multipartUploadFile)
                 .collect(Collectors.toList());
     }
+
+    @PostMapping("download")
+    public String downloadFile(@RequestParam String fileName) {
+        return amazonS3Service.downloadFile(fileName);
+    }
 }
