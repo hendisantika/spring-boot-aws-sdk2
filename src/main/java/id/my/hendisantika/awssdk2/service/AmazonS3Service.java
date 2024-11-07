@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 
 import java.util.List;
 
@@ -33,5 +34,13 @@ public class AmazonS3Service {
     public List<String> getAllBuckets() {
         return s3Client.listBuckets().buckets().stream()
                 .map(Bucket::name).toList();
+    }
+
+    public List<String> getBucketObjects() {
+        ListObjectsV2Request request = ListObjectsV2Request.builder()
+                .bucket(awsProperties.getS3().getBucket())
+                .build();
+        return s3Client.listObjectsV2(request).contents().stream()
+                .map(S3Object::key).toList();
     }
 }
