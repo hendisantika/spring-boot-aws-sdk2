@@ -10,11 +10,15 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequestEntry;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static id.my.hendisantika.awssdk2.utils.AwsUtils.getSQSQueueUrl;
 
@@ -70,5 +74,21 @@ public class AmazonSQSService {
                 .build();
 
         return sqsClient.sendMessage(sendMessageRequest);
+    }
+
+    public SendMessageBatchResponse produceBatch(List<String> messages) {
+        List<SendMessageBatchRequestEntry> entries = messages.stream()
+                .map(message -> SendMessageBatchRequestEntry.builder()
+                        .id(UUID.randomUUID().toString())
+                        .messageBody(message)
+                        .build()
+                ).toList();
+
+        SendMessageBatchRequest sendMessageBatchRequest = SendMessageBatchRequest.builder()
+                .queueUrl(getSQSQueueUrl(awsProperties))
+                .entries(entries)
+                .build();
+
+        return sqsClient.sendMessageBatch(sendMessageBatchRequest);
     }
 }
