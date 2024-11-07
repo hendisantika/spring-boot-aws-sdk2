@@ -59,4 +59,12 @@ public class AmazonS3Controller {
     public void deleteFile(@RequestParam String fileName) {
         amazonS3Service.deleteFile(fileName);
     }
+
+    @PostMapping("multipart")
+    public List<String> multipartUploadFile(@RequestParam("file") List<MultipartFile> multipartFiles) {
+        log.info("Multipart Upload Started.");
+        return multipartFiles.stream()
+                .map(amazonS3Service::multipartUploadFile)
+                .collect(Collectors.toList());
+    }
 }
