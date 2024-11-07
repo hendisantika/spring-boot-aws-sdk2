@@ -31,4 +31,13 @@ public class AmazonS3Config {
                 .region(Region.of(awsProperties.getS3().getRegion()))
                 .build();
     }
+
+    @Bean("s3Client")
+    public S3Client s3Client(@Qualifier("awsCredentials") AwsCredentialsProvider awsCredentials) {
+        return S3Client
+                .builder()
+                .credentialsProvider(awsCredentials)
+                .region(Region.of(awsProperties.getS3().getRegion()))
+                .build();
+    }
 }
