@@ -3,8 +3,11 @@ package id.my.hendisantika.awssdk2.controller;
 import id.my.hendisantika.awssdk2.service.AmazonS3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,4 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AmazonS3Controller {
 
     private final AmazonS3Service amazonS3Service;
+
+    @GetMapping("buckets")
+    public List<String> getAllBuckets() {
+        return amazonS3Service.getAllBuckets();
+    }
 }
