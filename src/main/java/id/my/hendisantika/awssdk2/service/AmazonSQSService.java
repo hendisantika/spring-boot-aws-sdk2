@@ -10,6 +10,8 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequestEntry;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 import java.util.Collections;
 import java.util.List;
@@ -59,5 +61,14 @@ public class AmazonSQSService {
 
         DeleteMessageBatchResponse deleteMessageBatchResponse = sqsClient.deleteMessageBatch(deleteMessageBatchRequest);
         return new MyTuple.MyTuple2<>(messages, deleteMessageBatchResponse);
+    }
+
+    public SendMessageResponse produce(String message) {
+        SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
+                .queueUrl(getSQSQueueUrl(awsProperties))
+                .messageBody(message)
+                .build();
+
+        return sqsClient.sendMessage(sendMessageRequest);
     }
 }
