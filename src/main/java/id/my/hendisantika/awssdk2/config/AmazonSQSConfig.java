@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
+import software.amazon.awssdk.services.sqs.SqsClient;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,6 +30,15 @@ public class AmazonSQSConfig {
     @Bean("sqsAsyncClient")
     public SqsAsyncClient sqsAsyncClient(@Qualifier("awsCredentials") AwsCredentialsProvider awsCredentials) {
         return SqsAsyncClient
+                .builder()
+                .credentialsProvider(awsCredentials)
+                .region(Region.of(awsProperties.getSqs().getRegion()))
+                .build();
+    }
+
+    @Bean("sqsClient")
+    public SqsClient sqsClient(@Qualifier("awsCredentials") AwsCredentialsProvider awsCredentials) {
+        return SqsClient
                 .builder()
                 .credentialsProvider(awsCredentials)
                 .region(Region.of(awsProperties.getSqs().getRegion()))
