@@ -75,4 +75,21 @@ public class AmazonS3Service {
 
         s3Client.deleteObject(deleteObjectRequest);
     }
+
+    public String updateFile(String fileName, MultipartFile multipartFile) {
+        try {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(awsProperties.getS3().getBucket())
+                    .key(fileName)
+                    .contentLength(multipartFile.getSize())
+                    .storageClass(StorageClass.GLACIER)
+                    .build();
+
+            s3Client.putObject(putObjectRequest,
+                    RequestBody.fromBytes(multipartFile.getInputStream().readAllBytes()));
+            return multipartFile.getOriginalFilename() + " Uploaded.";
+        } catch (IOException e) {
+            return e.getMessage();
+        }
+    }
 }
