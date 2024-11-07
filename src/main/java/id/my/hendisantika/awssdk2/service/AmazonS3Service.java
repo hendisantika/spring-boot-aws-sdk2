@@ -14,12 +14,15 @@ import software.amazon.awssdk.services.s3.model.CompletedPart;
 import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
 import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.StorageClass;
 import software.amazon.awssdk.services.s3.model.UploadPartRequest;
 import software.amazon.awssdk.services.s3.model.UploadPartResponse;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -167,6 +170,24 @@ public class AmazonS3Service {
                     .build();
             s3Client.abortMultipartUpload(abortMultipartUploadRequest);
             return e.getMessage();
+        }
+    }
+
+    public String downloadFile(String fileName) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(awsProperties.getS3().getBucket())
+                .key(fileName)
+                .build();
+
+        try {
+            byte[] objectResponse = s3Client.getObject(getObjectRequest).readAllBytes();
+            File file = new File(System.getProperty("user.dir") + "/" + fileName);
+            FileOutputStream fileOutputStream = new FileOutputStream(file, false);
+            fileOutputStream.write(objectResponse);
+            fileOutputStream.close();
+            return file.getAbsolutePath();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
