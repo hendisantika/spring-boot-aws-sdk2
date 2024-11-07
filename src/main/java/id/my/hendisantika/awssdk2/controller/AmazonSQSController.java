@@ -5,10 +5,13 @@ import id.my.hendisantika.awssdk2.utils.MyTuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 import java.util.List;
 
@@ -33,5 +36,10 @@ public class AmazonSQSController {
     @GetMapping
     public MyTuple.MyTuple2<List<Message>, DeleteMessageBatchResponse> consumeMessage() {
         return amazonSQSService.consume();
+    }
+
+    @PostMapping
+    public SendMessageResponse produceMessage(@RequestBody String message) {
+        return amazonSQSService.produce(message);
     }
 }
