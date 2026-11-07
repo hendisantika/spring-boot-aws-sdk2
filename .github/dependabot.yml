@@ -1,13 +1,65 @@
 version: 2
 updates:
-  - package-ecosystem: maven
-    directory: "/"
-    schedule:
-      interval: daily
-      time: '05:00'
-      timezone: Asia/Jakarta
-    open-pull-requests-limit: 10
-  - package-ecosystem: "github-actions"
+  # Maven dependencies (pom.xml)
+  - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "daily"
+      time: "05:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "java"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+    groups:
+      # AWS SDK v2 releases almost daily -> one PR for all AWS artifacts
+      aws-sdk:
+        patterns:
+          - "software.amazon.awssdk*"
+        update-types:
+          - "minor"
+          - "patch"
+      spring-boot:
+        patterns:
+          - "org.springframework.boot*"
+          - "org.springframework*"
+        update-types:
+          - "minor"
+          - "patch"
+      maven-plugins:
+        patterns:
+          - "org.apache.maven.plugins*"
+          - "*-maven-plugin"
+      other-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "software.amazon.awssdk*"
+          - "org.springframework*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions workflows (.github/workflows)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "05:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github_actions"
+    commit-message:
+      prefix: "ci(deps)"
+      include: "scope"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
